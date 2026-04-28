@@ -3,6 +3,10 @@
 > 面试题"企业级数字分身设计与搭建"的交付原型。
 > 服务跨境制造/贸易企业的**外贸业务员/海外销售经理**岗位，专攻"海外询盘集中在中国深夜到达、首响延迟 12-18h、高意向客户大量流失"这一具体痛点。
 
+| 产品动态说明（pitch.html） | Demo 端到端运行报告（demo-report.html） |
+| --- | --- |
+| ![pitch](docs/screenshots/pitch.png) | ![demo-report](docs/screenshots/demo-report.png) |
+
 ## 它能为企业算回多少账？
 
 以 50 人外贸团队为例（详细计算见 `docs/pitch.html`）：
