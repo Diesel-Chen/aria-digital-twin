@@ -1,0 +1,167 @@
+[
+  {
+    "id": "INQ-001",
+    "fromEmail": "purchasing@midwesthydraulic.com",
+    "fromCompany": "Midwest Hydraulic Supply LLC",
+    "customerId": "C001",
+    "subject": "RFQ: 50pcs hydraulic cylinder bore 50mm stroke 200mm",
+    "body": "Hi team,\n\nWe need a quotation for hydraulic cylinders with the following spec:\n- Bore: 50mm\n- Stroke: 200mm\n- Working pressure: 16MPa\n- Mounting: front flange\n- Quantity: 50 pieces, possible ramp to 200/quarter\n\nDelivery to Chicago by sea. Please advise FOB price, lead time, and payment terms (we usually do 30% TT deposit + 70% against BL copy).\n\nThanks,\nMike Donovan\nPurchasing Manager",
+    "language": "en",
+    "receivedAt": "2026-04-27T22:14:00+08:00",
+    "urgencyHint": "normal"
+  },
+  {
+    "id": "INQ-002",
+    "fromEmail": "rajesh@hindustanmech.in",
+    "fromCompany": "Hindustan Mech Components Pvt Ltd",
+    "customerId": "C002",
+    "subject": "Urgent: 10000pcs 6205-2RS bearings — repeat order",
+    "body": "Dear Sales,\n\nUrgent repeat order — our line stops on Friday if we don't have stock confirmed.\n\n6205-2RS deep groove ball bearings, 10,000 pieces, GCr15 chrome steel, 2RS rubber seal. Same spec as last 6 shipments.\n\nNeed:\n1. Confirmed availability today\n2. Best repeat-customer price (last PO was $1.78/pc)\n3. Earliest dispatch date\n\nMumbai port, CIF.\n\nRegards,\nRajesh Kumar",
+    "language": "en",
+    "receivedAt": "2026-04-28T03:42:00+08:00",
+    "urgencyHint": "high"
+  },
+  {
+    "id": "INQ-003",
+    "fromEmail": "compras@ferreteriashernandez.mx",
+    "fromCompany": "Industrias Ferreterías Hernández",
+    "customerId": "C003",
+    "subject": "Cotización tornillos M8 y M12",
+    "body": "Buenas noches,\n\nNecesitamos cotización para los siguientes productos:\n- Tornillo hexagonal M8x40 grado 8.8 zincado: 50,000 piezas\n- Tornillo hexagonal M12x60 grado 10.9 negro: 20,000 piezas\n- Tuerca hexagonal M10 zincada: 100,000 piezas\n\nDestino: Veracruz, México. Por favor enviar precio FOB Shanghai y tiempo de entrega.\n\nSaludos,\nMaría Hernández\nGerente de Compras",
+    "language": "es",
+    "receivedAt": "2026-04-28T01:08:00+08:00",
+    "urgencyHint": "normal"
+  },
+  {
+    "id": "INQ-004",
+    "fromEmail": "snab@promtekhsnab.ru",
+    "fromCompany": "OOO Promtekhsnab",
+    "customerId": "C004",
+    "subject": "Запрос: шаровые краны DN50 нержавеющая сталь",
+    "body": "Здравствуйте,\n\nПрошу выслать коммерческое предложение на шаровые краны:\n- Размер: DN50 (2 дюйма)\n- Давление: PN16\n- Материал: SS316\n- Резьбовое соединение BSP\n- Количество: 200 штук\n\nТребуется сертификат GOST. Доставка в Санкт-Петербург, CIF.\n\nС уважением,\nИван Петров\nОтдел снабжения",
+    "language": "ru",
+    "receivedAt": "2026-04-28T05:21:00+08:00",
+    "urgencyHint": "normal"
+  },
+  {
+    "id": "INQ-005",
+    "fromEmail": "quotes@bahydraulics.com.ar",
+    "fromCompany": "Buenos Aires Hydraulics SA",
+    "customerId": "C005",
+    "subject": "Consulta: cilindro hidráulico bore 40mm",
+    "body": "Hola,\n\nNecesito cilindro hidráulico:\n- Diámetro interior: 40mm\n- Carrera: 150mm\n- Presión: 16MPa\n- Montaje: clevis trasero\n- Cantidad: 8 unidades para una cosechadora\n\n¿Cuál es el precio FOB y tiempo de entrega? Gracias.\n\nDiego Fernández",
+    "language": "es",
+    "receivedAt": "2026-04-27T23:55:00+08:00",
+    "urgencyHint": "normal"
+  },
+  {
+    "id": "INQ-006",
+    "fromEmail": "tech.purchase@pew.com.pk",
+    "fromCompany": "Pakistan Engineering Works",
+    "customerId": "C006",
+    "subject": "Technical query: spherical roller bearing 22210EK availability",
+    "body": "Hello,\n\nWe are designing a new textile machine and need spherical roller bearings 22210EK with taper bore 1:12. Could you confirm:\n\n1. Do you stock GCr15 material? Some suppliers offer cheaper carbon steel which we cannot use.\n2. ISO P5 or P6 precision class?\n3. Quantity 30 pieces for prototype, then potential 500/year if approved.\n\nKarachi port. Please share TDS if available.\n\nBest,\nMuhammad Asif\nDesign Engineer",
+    "language": "en",
+    "receivedAt": "2026-04-28T02:15:00+08:00",
+    "urgencyHint": "normal"
+  },
+  {
+    "id": "INQ-007",
+    "fromEmail": "info@beltorgservice.by",
+    "fromCompany": "BelTorgService",
+    "customerId": "C007",
+    "subject": "Прайс-лист и условия сотрудничества",
+    "body": "Добрый день,\n\nМы видели вашу компанию на выставке в Минске. Интересует широкий ассортимент: подшипники, крепеж, гидравлика. Можете ли вы прислать общий прайс-лист и условия для нового дилера?\n\nВ первую очередь интересуют:\n- Подшипники 6205, 6206 серии\n- Болты M8, M10, M12\n\nС уважением,\nАндрей Соколов",
+    "language": "ru",
+    "receivedAt": "2026-04-28T04:48:00+08:00",
+    "urgencyHint": "low"
+  },
+  {
+    "id": "INQ-008",
+    "fromEmail": "ventas@maquipartesiberia.es",
+    "fromCompany": "MaquiPartes Iberia SL",
+    "customerId": "C008",
+    "subject": "RFQ: válvulas de bola DN25 SS304",
+    "body": "Estimados,\n\nPedido recurrente: 500 válvulas de bola DN25 (1\"), SS304, PN40, conexión BSP roscada.\n\nNecesitamos certificado CE y declaración RoHS. Destino Valencia, incoterm CIF.\n\nPrecio última PO: 12.10 USD/pza. Esperamos mantener o mejorar.\n\nGracias,\nCarmen Ruiz",
+    "language": "es",
+    "receivedAt": "2026-04-28T06:30:00+08:00",
+    "urgencyHint": "high"
+  },
+  {
+    "id": "INQ-009",
+    "fromEmail": "sourcing@oilfieldservices.com",
+    "fromCompany": "Gulf Oilfield Services Ltd",
+    "customerId": null,
+    "subject": "Quote needed: gate valves DN80 PN10 ductile iron",
+    "body": "We need 80 pieces of cast iron gate valves DN80 PN10, flanged ends, ductile iron GGG40 body. Application: fire-water network at offshore platform support.\n\nAPI 6D certification preferred. Please quote FOB Tianjin and lead time. Payment LC at sight.\n\nThanks,\nAhmed Al-Mansoori\nSourcing Lead",
+    "language": "en",
+    "receivedAt": "2026-04-28T07:55:00+08:00",
+    "urgencyHint": "normal"
+  },
+  {
+    "id": "INQ-010",
+    "fromEmail": "purchasing@aussiemachines.com.au",
+    "fromCompany": "Aussie Industrial Machines Pty",
+    "customerId": null,
+    "subject": "RFQ: solenoid valve 4WE6 DC24V Rexroth-compatible",
+    "body": "G'day,\n\nLooking for 50 pieces of solenoid directional valves NG6 size, 4-way 3-position spool E type, DC24V coil, max pressure 31.5MPa. Must be Rexroth 4WE6E compatible.\n\nMelbourne port. Need delivery within 6 weeks. Please send datasheet and pricing.\n\nCheers,\nDave Williams",
+    "language": "en",
+    "receivedAt": "2026-04-28T08:20:00+08:00",
+    "urgencyHint": "normal"
+  },
+  {
+    "id": "INQ-011",
+    "fromEmail": "cto@startup-machines.io",
+    "fromCompany": "Startup Machines Inc",
+    "customerId": null,
+    "subject": "Looking for someone to invest in our AI startup",
+    "body": "Dear Sir/Madam,\n\nWe are an exciting AI startup revolutionizing industrial automation. We're seeking strategic investors and partners who share our vision. Would you be interested in a 30-minute intro call to discuss potential collaboration?\n\nWe have great traction and bla bla bla.\n\nBest,\nJohn",
+    "language": "en",
+    "receivedAt": "2026-04-28T08:45:00+08:00",
+    "urgencyHint": "low"
+  },
+  {
+    "id": "INQ-012",
+    "fromEmail": "ops@pew.com.pk",
+    "fromCompany": "Pakistan Engineering Works",
+    "customerId": "C006",
+    "subject": "Follow-up on bearing 7208AC inquiry from last week",
+    "body": "Hello,\n\nFollowing up on our query about angular contact bearings 7208AC, contact angle 25°. We did not receive a response yet. Order needed: 200pcs. Karachi.\n\nIs there anyone covering my account?\n\nMuhammad Asif",
+    "language": "en",
+    "receivedAt": "2026-04-28T03:11:00+08:00",
+    "urgencyHint": "high"
+  },
+  {
+    "id": "INQ-013",
+    "fromEmail": "snab@promtekhsnab.ru",
+    "fromCompany": "OOO Promtekhsnab",
+    "customerId": "C004",
+    "subject": "Доп. позиция к заказу: гидрошланг 2SN 1/2",
+    "body": "Добавьте к нашему текущему запросу также:\n- Шланг гидравлический 2SN, 1/2 дюйма, 500 метров\n- Рабочее давление 27.5 МПа\n\nДоставка вместе с шаровыми кранами.\n\nИван",
+    "language": "ru",
+    "receivedAt": "2026-04-28T05:28:00+08:00",
+    "urgencyHint": "normal"
+  },
+  {
+    "id": "INQ-014",
+    "fromEmail": "buyer@sinopec-supply.com",
+    "fromCompany": "Sinopec Supply Chain",
+    "customerId": null,
+    "subject": "Bulk inquiry: hex bolts M8/M12/M16 hot-dip galvanized",
+    "body": "Hi,\n\nLarge project demand:\n- M8x40 grade 8.8 HDG: 200,000 pcs\n- M12x60 grade 10.9 HDG: 80,000 pcs\n- M16x80 grade 8.8 HDG: 40,000 pcs\n\nDIN931/933. Project: petrochemical plant in Saudi Arabia. Required CE + EN15048 certified production.\n\nPlease quote your best price and delivery. Project shortlist closing in 10 days.\n\nThanks,\nLi Wei (procurement agent)",
+    "language": "en",
+    "receivedAt": "2026-04-28T06:10:00+08:00",
+    "urgencyHint": "high"
+  },
+  {
+    "id": "INQ-015",
+    "fromEmail": "compras@ferreteriashernandez.mx",
+    "fromCompany": "Industrias Ferreterías Hernández",
+    "customerId": "C003",
+    "subject": "¿Recibieron mi cotización? — seguimiento",
+    "body": "Hola,\n\nLes envié una solicitud hace 3 días sobre tornillos M8/M12 y tuercas M10. No he recibido respuesta. ¿Está mi pedido en proceso?\n\nNecesito decisión esta semana, otros proveedores ya respondieron.\n\nMaría",
+    "language": "es",
+    "receivedAt": "2026-04-28T07:40:00+08:00",
+    "urgencyHint": "high"
+  }
+]

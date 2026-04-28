@@ -1,0 +1,22 @@
+{
+  "name": "aria-digital-twin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Aria — 跨境 B2B 高意向询盘响应数字分身（面试题原型）",
+  "scripts": {
+    "demo": "bun scripts/demo.ts",
+    "demo:live": "LIVE=1 bun scripts/demo.ts",
+    "pitch": "bun scripts/generate-pitch.ts",
+    "all": "bun scripts/demo.ts && bun scripts/generate-pitch.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^1.3.0",
+    "ai": "^4.3.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.5.0"
+  }
+}

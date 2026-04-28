@@ -1,0 +1,1642 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>Aria 数字分身 — Demo 端到端运行报告</title>
+<style>
+  :root {
+    --bg: #0e1220; --surface: #161a2c; --line: #232844;
+    --text: #e6e9f5; --muted: #9aa0bd; --accent: #6c8aff; --accent2: #8b6cff;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.55; }
+  .top { padding: 28px 40px; border-bottom: 1px solid var(--line); background: linear-gradient(120deg, #1a2042, #0e1220); }
+  h1 { margin: 0; font-size: 22px; }
+  .subtitle { color: var(--muted); margin-top: 6px; font-size: 13px; }
+  .container { padding: 24px 40px 80px; }
+  .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .roi-card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .roi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+  .roi-value { font-size: 24px; font-weight: 600; margin-top: 4px; color: var(--accent); }
+  .roi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .section-title { display: flex; align-items: center; gap: 10px; margin: 28px 0 14px; font-size: 15px; }
+  .section-title::before { content: ""; display: inline-block; width: 4px; height: 16px; background: var(--accent); border-radius: 2px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+  .card-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.02); }
+  .inquiry-id { font-family: ui-monospace, monospace; color: var(--accent); font-size: 12px; }
+  .lang-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: var(--line); color: var(--muted); margin-left: 8px; }
+  .blind-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #2c2350; color: #c8b8ff; margin-left: 8px; }
+  .grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.4fr 1fr; gap: 0; }
+  .grid > section { padding: 12px 14px; border-right: 1px solid var(--line); min-width: 0; }
+  .grid > section:last-child { border-right: none; }
+  h4 { margin: 0 0 8px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .meta { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .subject { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+  pre { font-family: ui-monospace, "SF Mono", monospace; font-size: 11px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; margin: 0; color: #cdd2e8; max-height: 220px; overflow: auto; }
+  .body { background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; }
+  .kv { list-style: none; padding: 0; margin: 0; font-size: 11px; }
+  .kv li { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dashed var(--line); }
+  .kv b { color: var(--muted); font-weight: normal; }
+  .urgency-high { color: #ff7676; font-weight: 600; }
+  .urgency-normal { color: var(--text); }
+  .urgency-low { color: var(--muted); }
+  .reject { margin-top: 6px; padding: 6px 8px; background: rgba(220,80,80,0.15); border-left: 2px solid #d65a5a; font-size: 11px; }
+  table.matches { width: 100%; font-size: 11px; border-collapse: collapse; }
+  table.matches th { text-align: left; color: var(--muted); font-weight: normal; padding: 4px 4px; border-bottom: 1px solid var(--line); }
+  table.matches td { padding: 4px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  code { font-family: ui-monospace, monospace; font-size: 10.5px; color: var(--accent); }
+  .conf { display: inline-block; padding: 1px 5px; border-radius: 3px; font-family: ui-monospace, monospace; font-size: 10px; }
+  .conf-high { background: rgba(50,180,90,0.2); color: #7ee0a3; }
+  .conf-mid { background: rgba(220,170,40,0.2); color: #f0d166; }
+  .conf-low { background: rgba(220,80,80,0.2); color: #ff8a8a; }
+  .draft-subject { font-size: 11px; color: var(--accent); margin-bottom: 4px; }
+  .draft pre { background: rgba(108,138,255,0.06); padding: 8px; border-radius: 4px; max-height: 240px; }
+  .revision { margin-top: 8px; padding: 8px; background: rgba(255,200,80,0.07); border-left: 2px solid #d4a73a; border-radius: 4px; }
+  .revision summary { cursor: pointer; font-size: 11px; color: #f0d166; }
+  .rev-summary { font-size: 11px; color: var(--muted); margin: 4px 0; }
+  .route-section { font-size: 11px; }
+  .route-reason { color: var(--muted); margin: 6px 0; line-height: 1.5; }
+  .meta-line { color: var(--muted); font-size: 10.5px; margin-top: 6px; }
+  .via-live { color: #7ee0a3; }
+  .via-mock { color: var(--muted); }
+  .badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 500; }
+  .follow-up, .reply-back { margin-top: 8px; padding: 6px 8px; background: rgba(108,138,255,0.08); border-radius: 4px; font-size: 11px; }
+  .pattern-list { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+  .pattern-list ul { margin: 0; padding-left: 20px; }
+  .footer { color: var(--muted); font-size: 11px; margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr 1fr; } .grid > section { border-right: none; border-bottom: 1px solid var(--line); } .roi-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1>Aria 数字分身 · Demo 端到端运行报告</h1>
+    <div class="subtitle">15 条多语言询盘 → 解析 → SKU 匹配 → 草稿 → 路由决策 → 跟进编排 → ROI 看板 ｜ LLM: 0 live / 15 mock</div>
+  </div>
+  <div class="container">
+
+    <h2 class="section-title">ROI 看板（本批次模拟为月度数据）</h2>
+    <div class="roi-grid">
+      <div class="roi-card"><div class="roi-label">替代人力成本</div><div class="roi-value">¥420</div><div class="roi-sub">14 条询盘 × ¥30/条</div></div>
+      <div class="roi-card"><div class="roi-label">挽回流失线索价值</div><div class="roi-value">¥5.4w</div><div class="roi-sub">盲区时段 14 条 / 已促回复 3 条</div></div>
+      <div class="roi-card"><div class="roi-label">效率提升折算</div><div class="roi-value">¥2,500</div><div class="roi-sub">平均首响 1.7h (vs 24h 人工)</div></div>
+      <div class="roi-card"><div class="roi-label">月度净增量价值</div><div class="roi-value">¥5.2w</div><div class="roi-sub">订阅 ¥5000/月 · 回本 0.1月</div></div>
+    </div>
+    <div class="roi-grid">
+      <div class="roi-card"><div class="roi-label">自动发送</div><div class="roi-value" style="color:#7ee0a3">2</div><div class="roi-sub">高置信 + 紧急度可控</div></div>
+      <div class="roi-card"><div class="roi-label">送审队列</div><div class="roi-value" style="color:#f0d166">7</div><div class="roi-sub">业务员快速审核</div></div>
+      <div class="roi-card"><div class="roi-label">转人工</div><div class="roi-value" style="color:#ff8a8a">5</div><div class="roi-sub">情绪/认证/低置信触发</div></div>
+      <div class="roi-card"><div class="roi-label">跟进覆盖率</div><div class="roi-value">100%</div><div class="roi-sub">vs 行业基线 42%</div></div>
+    </div>
+
+    <h2 class="section-title">15 条询盘 5 段式处理详情</h2>
+    
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-001</span>
+        <span class="lang-tag">EN</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#0a7d4f;color:#d4f5e1;">✓ 自动发送</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">Midwest Hydraulic Supply LLC &lt;purchasing@midwesthydraulic.com&gt;<br/>2026/4/27 22:14:00</div>
+        <div class="subject">RFQ: 50pcs hydraulic cylinder bore 50mm stroke 200mm</div>
+        <pre class="body">Hi team,
+
+We need a quotation for hydraulic cylinders with the following spec:
+- Bore: 50mm
+- Stroke: 200mm
+- Working pressure: 16MPa
+- Mounting: front flange
+- Quantity: 50 pieces, possible ramp to 200/quarter
+
+Delivery to Chicago by sea. Please advise FOB price, lead time, and payment terms (we usually do 30% TT deposit + 70% against BL copy).
+
+Thanks,
+Mike Donovan
+Purchasing Manager</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>Midwest Hydraulic Supply LLC 寻购 hydraulic，约 50 件，目的港 Chicago</span></li>
+            <li><b>类别</b><span>hydraulic</span></li>
+            <li><b>数量</b><span>50</span></li>
+            <li><b>目的港</b><span>Chicago</span></li>
+            <li><b>紧急度</b><span class="urgency-normal">normal</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>—</span></li>
+            <li><b>关键词</b><span>200</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>HY-CYL-50-200</code></td>
+                  <td><span class="conf conf-high">1.00</span></td>
+                  <td>exact</td>
+                  <td>SKU 含 200；bore=50mm 命中；stroke=200mm 命中</td>
+                </tr><tr>
+                  <td><code>HY-CYL-40-150</code></td>
+                  <td><span class="conf conf-low">0.42</span></td>
+                  <td>upgrade</td>
+                  <td>pressure=16MPa 命中</td>
+                </tr><tr>
+                  <td><code>HY-VLV-4WE6</code></td>
+                  <td><span class="conf conf-low">0.38</span></td>
+                  <td>upgrade</td>
+                  <td>客户历史采购</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: RFQ: 50pcs hydraulic cylinder bore 50mm stroke 200mm</div>
+                <pre>Thank you for the inquiry on Midwest Hydraulic Supply LLC 寻购 hydraulic，约 50 件，目的港 Chicago. I have reviewed the spec and pulled candidate SKUs from our catalog.
+As a long-term partner, I have flagged this for priority handling.
+
+Recommended SKUs:
+1. HY-CYL-50-200 — Hydraulic Cylinder Bore 50mm Stroke 200mm | 145 USD | MOQ 5 | 25 days | SKU 含 200；bore=50mm 命中；stroke=200mm 命中
+2. HY-CYL-40-150 — Hydraulic Cylinder Bore 40mm Stroke 150mm | 110 USD | MOQ 5 | 25 days | pressure=16MPa 命中
+3. HY-VLV-4WE6 — Solenoid Directional Valve 4WE6E DC24V | 95 USD | MOQ 10 | 20 days | 客户历史采购
+
+To finalize the formal PI, please confirm:
+1. Confirm the order quantity is 50 pcs and your target FOB unit price.
+2. Required certifications (CE / GOST / API / ISO)
+
+Will send a formal PI with packing list and shipping options within 24h after the above is confirmed.
+
+Best regards,
+Aria · Sales Assistant</pre>
+              </div>
+        <details class="revision">
+                <summary>📝 业务员修订（diff 7%）</summary>
+                <div class="rev-summary">补充付款条款明确表态 + 增加样品赠送钩子</div>
+                <pre>Thank you for the inquiry on Midwest Hydraulic Supply LLC 寻购 hydraulic，约 50 件，目的港 Chicago. I have reviewed the spec and pulled candidate SKUs from our catalog.
+As a long-term partner, I have flagged this for priority handling.
+
+Recommended SKUs:
+1. HY-CYL-50-200 — Hydraulic Cylinder Bore 50mm Stroke 200mm | 145 USD | MOQ 5 | 25 days | SKU 含 200；bore=50mm 命中；stroke=200mm 命中
+2. HY-CYL-40-150 — Hydraulic Cylinder Bore 40mm Stroke 150mm | 110 USD | MOQ 5 | 25 days | pressure=16MPa 命中
+3. HY-VLV-4WE6 — Solenoid Directional Valve 4WE6E DC24V | 95 USD | MOQ 10 | 20 days | 客户历史采购
+
+To finalize the formal PI, please confirm:
+1. Confirm the order quantity is 50 pcs and your target FOB unit price.
+2. Required certifications (CE / GOST / API / ISO)
+
+Will send a formal PI with packing list and shipping options within 24h after the above is confirmed.
+
+Best regards,
+Aria · Sales Assistant
+
+P.S. We also offer free sample of seal kit for your evaluation.</pre>
+              </details>
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#0a7d4f;color:#d4f5e1;">✓ 自动发送</span></div>
+        <p class="route-reason">Top SKU 置信度 1.00 ≥ 0.85，紧急度可控，自动发送</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 2ms
+        </div>
+        
+        <div class="reply-back">📬 客户回复：Thanks, the spec and quantity look fine. Please send formal PI....</div>
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-002</span>
+        <span class="lang-tag">EN</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#9a3328;color:#ffd9d4;">👤 转人工</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">Hindustan Mech Components Pvt Ltd &lt;rajesh@hindustanmech.in&gt;<br/>2026/4/28 03:42:00</div>
+        <div class="subject">Urgent: 10000pcs 6205-2RS bearings — repeat order</div>
+        <pre class="body">Dear Sales,
+
+Urgent repeat order — our line stops on Friday if we don't have stock confirmed.
+
+6205-2RS deep groove ball bearings, 10,000 pieces, GCr15 chrome steel, 2RS rubber seal. Same spec as last 6 shipments.
+
+Need:
+1. Confirmed availability today
+2. Best repeat-customer price (last PO was $1.78/pc)
+3. Earliest dispatch date
+
+Mumbai port, CIF.
+
+Regards,
+Rajesh Kumar</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>Hindustan Mech Components Pvt Ltd 寻购 bearing，目的港 Mumbai</span></li>
+            <li><b>类别</b><span>bearing</span></li>
+            <li><b>数量</b><span>0</span></li>
+            <li><b>目的港</b><span>Mumbai</span></li>
+            <li><b>紧急度</b><span class="urgency-high">high</span></li>
+            <li><b>情绪</b><span>frustrated</span></li>
+            <li><b>认证</b><span>—</span></li>
+            <li><b>关键词</b><span>6205-2RS / 000</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>BR-6205-2RS</code></td>
+                  <td><span class="conf conf-mid">0.78</span></td>
+                  <td>alternate</td>
+                  <td>SKU 含 6205-2RS；客户历史采购</td>
+                </tr><tr>
+                  <td><code>BR-6206-ZZ</code></td>
+                  <td><span class="conf conf-low">0.38</span></td>
+                  <td>upgrade</td>
+                  <td>客户历史采购</td>
+                </tr><tr>
+                  <td><code>BR-6203-2RS</code></td>
+                  <td><span class="conf conf-low">0.38</span></td>
+                  <td>upgrade</td>
+                  <td>客户历史采购</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: Urgent: 10000pcs 6205-2RS bearings — repeat order</div>
+                <pre>Thank you for the inquiry on Hindustan Mech Components Pvt Ltd 寻购 bearing，目的港 Mumbai. I have reviewed the spec and pulled candidate SKUs from our catalog.
+As a long-term partner, I have flagged this for priority handling.
+
+Recommended SKUs:
+1. BR-6205-2RS — Deep Groove Ball Bearing 6205-2RS | 1.85 USD | MOQ 100 | 7 days | SKU 含 6205-2RS；客户历史采购
+2. BR-6206-ZZ — Deep Groove Ball Bearing 6206-ZZ | 2.3 USD | MOQ 100 | 7 days | 客户历史采购
+3. BR-6203-2RS — Deep Groove Ball Bearing 6203-2RS | 1.2 USD | MOQ 200 | 7 days | 客户历史采购
+
+To finalize the formal PI, please confirm:
+1. Final order quantity &amp; target unit price (USD/pc, FOB)
+2. Required certifications (CE / GOST / API / ISO)
+
+Will send a formal PI with packing list and shipping options within 24h after the above is confirmed.
+
+Best regards,
+Aria · Sales Assistant</pre>
+              </div>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#9a3328;color:#ffd9d4;">👤 转人工</span></div>
+        <p class="route-reason">客户已表现不耐烦/催单，必须真人接管以稳住关系</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        
+        <div class="reply-back">📬 客户回复：Thanks, the spec and quantity look fine. Please send formal PI....</div>
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-003</span>
+        <span class="lang-tag">ES</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">Industrias Ferreterías Hernández &lt;compras@ferreteriashernandez.mx&gt;<br/>2026/4/28 01:08:00</div>
+        <div class="subject">Cotización tornillos M8 y M12</div>
+        <pre class="body">Buenas noches,
+
+Necesitamos cotización para los siguientes productos:
+- Tornillo hexagonal M8x40 grado 8.8 zincado: 50,000 piezas
+- Tornillo hexagonal M12x60 grado 10.9 negro: 20,000 piezas
+- Tuerca hexagonal M10 zincada: 100,000 piezas
+
+Destino: Veracruz, México. Por favor enviar precio FOB Shanghai y tiempo de entrega.
+
+Saludos,
+María Hernández
+Gerente de Compras</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>Industrias Ferreterías Hernández 寻购 fastener，目的港 Veracruz</span></li>
+            <li><b>类别</b><span>fastener</span></li>
+            <li><b>数量</b><span>0</span></li>
+            <li><b>目的港</b><span>Veracruz</span></li>
+            <li><b>紧急度</b><span class="urgency-normal">normal</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>—</span></li>
+            <li><b>关键词</b><span>000 / 100 / M8x40 / M12x60 / M10</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>FS-NUT-M10</code></td>
+                  <td><span class="conf conf-mid">0.78</span></td>
+                  <td>alternate</td>
+                  <td>SKU 含 M10；客户历史采购</td>
+                </tr><tr>
+                  <td><code>FS-ANCHOR-M10</code></td>
+                  <td><span class="conf conf-mid">0.70</span></td>
+                  <td>alternate</td>
+                  <td>SKU 含 M10</td>
+                </tr><tr>
+                  <td><code>FS-BOLT-M8</code></td>
+                  <td><span class="conf conf-mid">0.68</span></td>
+                  <td>upgrade</td>
+                  <td>规格匹配 M8x40；grade=8.8 命中；客户历史采购</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: Cotización tornillos M8 y M12</div>
+                <pre>Gracias por su consulta sobre Industrias Ferreterías Hernández 寻购 fastener，目的港 Veracruz. Hemos revisado la especificación y seleccionado SKUs candidatos de nuestro catálogo.
+
+SKUs recomendados:
+1. FS-NUT-M10 — Hex Nut M10 Grade 8 Zinc Plated | 0.04 USD | MOQ 10000 | 5 days | SKU 含 M10；客户历史采购
+2. FS-ANCHOR-M10 — Expansion Anchor Bolt M10x80 Zinc | 0.32 USD | MOQ 1000 | 12 days | SKU 含 M10
+3. FS-BOLT-M8 — Hex Bolt M8x40 Grade 8.8 Zinc Plated | 0.05 USD | MOQ 5000 | 7 days | 规格匹配 M8x40；grade=8.8 命中；客户历史采购
+
+Para emitir la PI formal, por favor confirme:
+1. Cantidad final del pedido y precio objetivo (USD/pza FOB)
+2. Certificaciones requeridas (CE / GOST / RoHS)
+
+Enviaremos una PI formal con lista de empaque y opciones de envío dentro de 24h tras la confirmación.
+
+Saludos cordiales,
+Aria · Asistente de Ventas</pre>
+              </div>
+        <details class="revision">
+                <summary>📝 业务员修订（diff 0%）</summary>
+                <div class="rev-summary">Lead time 表述本地化 + 强调可议价</div>
+                <pre>Gracias por su consulta sobre Industrias Ferreterías Hernández 寻购 fastener，目的港 Veracruz. Hemos revisado la especificación y seleccionado SKUs candidatos de nuestro catálogo.
+
+SKUs recomendados:
+1. FS-NUT-M10 — Hex Nut M10 Grade 8 Zinc Plated | 0.04 USD | MOQ 10000 | 5 days | SKU 含 M10；客户历史采购
+2. FS-ANCHOR-M10 — Expansion Anchor Bolt M10x80 Zinc | 0.32 USD | MOQ 1000 | 12 days | SKU 含 M10
+3. FS-BOLT-M8 — Hex Bolt M8x40 Grade 8.8 Zinc Plated | 0.05 USD | MOQ 5000 | 7 days | 规格匹配 M8x40；grade=8.8 命中；客户历史采购
+
+Para emitir la PI formal, por favor confirme:
+1. Cantidad final del pedido y precio objetivo (USD/pza FOB)
+2. Certificaciones requeridas (CE / GOST / RoHS)
+
+Enviaremos una PI formal con lista de empaque y opciones de envío dentro de 24h tras la confirmación.
+
+Saludos cordiales,
+Aria · Asistente de Ventas</pre>
+              </details>
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span></div>
+        <p class="route-reason">匹配置信度 0.78，业务员快速过审后即可发出</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        <div class="follow-up">📨 72h 沉默触发跟进：<em>Seguimiento: Cotización tornillos M8 y M12</em></div>
+        
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-004</span>
+        <span class="lang-tag">RU</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#0a7d4f;color:#d4f5e1;">✓ 自动发送</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">OOO Promtekhsnab &lt;snab@promtekhsnab.ru&gt;<br/>2026/4/28 05:21:00</div>
+        <div class="subject">Запрос: шаровые краны DN50 нержавеющая сталь</div>
+        <pre class="body">Здравствуйте,
+
+Прошу выслать коммерческое предложение на шаровые краны:
+- Размер: DN50 (2 дюйма)
+- Давление: PN16
+- Материал: SS316
+- Резьбовое соединение BSP
+- Количество: 200 штук
+
+Требуется сертификат GOST. Доставка в Санкт-Петербург, CIF.
+
+С уважением,
+Иван Петров
+Отдел снабжения</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>OOO Promtekhsnab 寻购 valve，约 200 件，目的港 Санкт-Петербург</span></li>
+            <li><b>类别</b><span>valve</span></li>
+            <li><b>数量</b><span>200</span></li>
+            <li><b>目的港</b><span>Санкт-Петербург</span></li>
+            <li><b>紧急度</b><span class="urgency-normal">normal</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>GOST</span></li>
+            <li><b>关键词</b><span>200 / DN50</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>VL-BV-DN50</code></td>
+                  <td><span class="conf conf-high">0.90</span></td>
+                  <td>exact</td>
+                  <td>SKU 含 DN50；pressure=PN16 命中；客户历史采购</td>
+                </tr><tr>
+                  <td><code>VL-CHV-DN40</code></td>
+                  <td><span class="conf conf-low">0.42</span></td>
+                  <td>upgrade</td>
+                  <td>pressure=PN16 命中</td>
+                </tr><tr>
+                  <td><code>VL-BFV-DN100</code></td>
+                  <td><span class="conf conf-low">0.42</span></td>
+                  <td>upgrade</td>
+                  <td>pressure=PN16 命中</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: Запрос: шаровые краны DN50 нержавеющая сталь</div>
+                <pre>Благодарим за запрос по OOO Promtekhsnab 寻购 valve，约 200 件，目的港 Санкт-Петербург. Мы изучили спецификацию и подобрали SKU из нашего каталога.
+Как долгосрочный партнёр, ваш запрос отмечен как приоритетный.
+
+Рекомендуемые SKU:
+1. VL-BV-DN50 — Stainless Steel Ball Valve DN50 | 28 USD | MOQ 20 | 15 days | SKU 含 DN50；pressure=PN16 命中；客户历史采购
+2. VL-CHV-DN40 — Brass Check Valve DN40 | 18.5 USD | MOQ 30 | 10 days | pressure=PN16 命中
+3. VL-BFV-DN100 — Wafer Butterfly Valve DN100 | 42 USD | MOQ 20 | 18 days | pressure=PN16 命中
+
+Для оформления формального PI, пожалуйста, подтвердите:
+1. Confirm the order quantity is 200 pcs and your target FOB unit price.
+2. Please confirm the required certifications: GOST.
+
+Формальный PI с упаковочным листом и вариантами доставки будет отправлен в течение 24 часов после подтверждения.
+
+С уважением,
+Aria · Помощник отдела продаж</pre>
+              </div>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#0a7d4f;color:#d4f5e1;">✓ 自动发送</span></div>
+        <p class="route-reason">Top SKU 置信度 0.90 ≥ 0.85，紧急度可控，自动发送</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        <div class="follow-up">📨 72h 沉默触发跟进：<em>Напоминание: Запрос: шаровые краны DN50 нержавеющая сталь</em></div>
+        
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-005</span>
+        <span class="lang-tag">ES</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">Buenos Aires Hydraulics SA &lt;quotes@bahydraulics.com.ar&gt;<br/>2026/4/27 23:55:00</div>
+        <div class="subject">Consulta: cilindro hidráulico bore 40mm</div>
+        <pre class="body">Hola,
+
+Necesito cilindro hidráulico:
+- Diámetro interior: 40mm
+- Carrera: 150mm
+- Presión: 16MPa
+- Montaje: clevis trasero
+- Cantidad: 8 unidades para una cosechadora
+
+¿Cuál es el precio FOB y tiempo de entrega? Gracias.
+
+Diego Fernández</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>Buenos Aires Hydraulics SA 寻购 hydraulic，约 8 件</span></li>
+            <li><b>类别</b><span>hydraulic</span></li>
+            <li><b>数量</b><span>8</span></li>
+            <li><b>目的港</b><span>未明示</span></li>
+            <li><b>紧急度</b><span class="urgency-normal">normal</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>—</span></li>
+            <li><b>关键词</b><span>—</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>HY-CYL-40-150</code></td>
+                  <td><span class="conf conf-mid">0.74</span></td>
+                  <td>alternate</td>
+                  <td>bore=40mm 命中；stroke=150mm 命中；pressure=16MPa 命中</td>
+                </tr><tr>
+                  <td><code>HY-CYL-50-200</code></td>
+                  <td><span class="conf conf-low">0.42</span></td>
+                  <td>upgrade</td>
+                  <td>pressure=16MPa 命中</td>
+                </tr><tr>
+                  <td><code>HY-CYL-80-300</code></td>
+                  <td><span class="conf conf-low">0.30</span></td>
+                  <td>upgrade</td>
+                  <td>类别一致</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: Consulta: cilindro hidráulico bore 40mm</div>
+                <pre>Gracias por su consulta sobre Buenos Aires Hydraulics SA 寻购 hydraulic，约 8 件. Hemos revisado la especificación y seleccionado SKUs candidatos de nuestro catálogo.
+
+SKUs recomendados:
+1. HY-CYL-40-150 — Hydraulic Cylinder Bore 40mm Stroke 150mm | 110 USD | MOQ 5 | 25 days | bore=40mm 命中；stroke=150mm 命中；pressure=16MPa 命中
+2. HY-CYL-50-200 — Hydraulic Cylinder Bore 50mm Stroke 200mm | 145 USD | MOQ 5 | 25 days | pressure=16MPa 命中
+3. HY-CYL-80-300 — Hydraulic Cylinder Bore 80mm Stroke 300mm | 280 USD | MOQ 5 | 30 days | 类别一致
+
+Para emitir la PI formal, por favor confirme:
+1. Confirm the order quantity is 8 pcs and your target FOB unit price.
+2. Certificaciones requeridas (CE / GOST / RoHS)
+
+Enviaremos una PI formal con lista de empaque y opciones de envío dentro de 24h tras la confirmación.
+
+Saludos cordiales,
+Aria · Asistente de Ventas</pre>
+              </div>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span></div>
+        <p class="route-reason">匹配置信度 0.74，业务员快速过审后即可发出</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 1ms
+        </div>
+        <div class="follow-up">📨 72h 沉默触发跟进：<em>Seguimiento: Consulta: cilindro hidráulico bore 40mm</em></div>
+        
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-006</span>
+        <span class="lang-tag">EN</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">Pakistan Engineering Works &lt;tech.purchase@pew.com.pk&gt;<br/>2026/4/28 02:15:00</div>
+        <div class="subject">Technical query: spherical roller bearing 22210EK availability</div>
+        <pre class="body">Hello,
+
+We are designing a new textile machine and need spherical roller bearings 22210EK with taper bore 1:12. Could you confirm:
+
+1. Do you stock GCr15 material? Some suppliers offer cheaper carbon steel which we cannot use.
+2. ISO P5 or P6 precision class?
+3. Quantity 30 pieces for prototype, then potential 500/year if approved.
+
+Karachi port. Please share TDS if available.
+
+Best,
+Muhammad Asif
+Design Engineer</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>Pakistan Engineering Works 寻购 bearing，约 30 件，目的港 Karachi</span></li>
+            <li><b>类别</b><span>bearing</span></li>
+            <li><b>数量</b><span>30</span></li>
+            <li><b>目的港</b><span>Karachi</span></li>
+            <li><b>紧急度</b><span class="urgency-normal">normal</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>ISO P5/P6</span></li>
+            <li><b>关键词</b><span>500</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>BR-22210-EK</code></td>
+                  <td><span class="conf conf-low">0.38</span></td>
+                  <td>upgrade</td>
+                  <td>客户历史采购</td>
+                </tr><tr>
+                  <td><code>BR-NU308-E</code></td>
+                  <td><span class="conf conf-low">0.30</span></td>
+                  <td>upgrade</td>
+                  <td>类别一致</td>
+                </tr><tr>
+                  <td><code>BR-7208-AC</code></td>
+                  <td><span class="conf conf-low">0.23</span></td>
+                  <td>upgrade</td>
+                  <td>客户历史采购；数量低于 MOQ 50</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: Technical query: spherical roller bearing 22210EK availability</div>
+                <pre>Thank you for the inquiry on Pakistan Engineering Works 寻购 bearing，约 30 件，目的港 Karachi. I have reviewed the spec and pulled candidate SKUs from our catalog.
+
+Recommended SKUs:
+1. BR-22210-EK — Spherical Roller Bearing 22210EK | 18.5 USD | MOQ 20 | 14 days | 客户历史采购
+2. BR-NU308-E — Cylindrical Roller Bearing NU308E | 12.4 USD | MOQ 30 | 10 days | 类别一致
+3. BR-7208-AC — Angular Contact Ball Bearing 7208AC | 6.8 USD | MOQ 50 | 10 days | 客户历史采购；数量低于 MOQ 50
+
+To finalize the formal PI, please confirm:
+1. Confirm the order quantity is 30 pcs and your target FOB unit price.
+2. Please confirm the required certifications: ISO P5/P6.
+
+Will send a formal PI with packing list and shipping options within 24h after the above is confirmed.
+
+Best regards,
+Aria · Sales Assistant</pre>
+              </div>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span></div>
+        <p class="route-reason">涉及认证 (ISO P5/P6)，非 A 级客户首单，先送审</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        <div class="follow-up">📨 72h 沉默触发跟进：<em>Following up: Technical query: spherical roller bearing 22210EK availability</em></div>
+        
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-007</span>
+        <span class="lang-tag">RU</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">BelTorgService &lt;info@beltorgservice.by&gt;<br/>2026/4/28 04:48:00</div>
+        <div class="subject">Прайс-лист и условия сотрудничества</div>
+        <pre class="body">Добрый день,
+
+Мы видели вашу компанию на выставке в Минске. Интересует широкий ассортимент: подшипники, крепеж, гидравлика. Можете ли вы прислать общий прайс-лист и условия для нового дилера?
+
+В первую очередь интересуют:
+- Подшипники 6205, 6206 серии
+- Болты M8, M10, M12
+
+С уважением,
+Андрей Соколов</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>BelTorgService 寻购 mixed</span></li>
+            <li><b>类别</b><span>mixed</span></li>
+            <li><b>数量</b><span>未明示</span></li>
+            <li><b>目的港</b><span>未明示</span></li>
+            <li><b>紧急度</b><span class="urgency-low">low</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>—</span></li>
+            <li><b>关键词</b><span>6205 / 6206 / M8 / M10 / M12</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>BR-6205-2RS</code></td>
+                  <td><span class="conf conf-mid">0.70</span></td>
+                  <td>alternate</td>
+                  <td>SKU 含 6205</td>
+                </tr><tr>
+                  <td><code>BR-6206-ZZ</code></td>
+                  <td><span class="conf conf-mid">0.70</span></td>
+                  <td>alternate</td>
+                  <td>SKU 含 6206</td>
+                </tr><tr>
+                  <td><code>FS-BOLT-M8</code></td>
+                  <td><span class="conf conf-mid">0.70</span></td>
+                  <td>alternate</td>
+                  <td>SKU 含 M8</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: Прайс-лист и условия сотрудничества</div>
+                <pre>Благодарим за запрос по BelTorgService 寻购 mixed. Мы изучили спецификацию и подобрали SKU из нашего каталога.
+
+Рекомендуемые SKU:
+1. BR-6205-2RS — Deep Groove Ball Bearing 6205-2RS | 1.85 USD | MOQ 100 | 7 days | SKU 含 6205
+2. BR-6206-ZZ — Deep Groove Ball Bearing 6206-ZZ | 2.3 USD | MOQ 100 | 7 days | SKU 含 6206
+3. FS-BOLT-M8 — Hex Bolt M8x40 Grade 8.8 Zinc Plated | 0.05 USD | MOQ 5000 | 7 days | SKU 含 M8
+
+Для оформления формального PI, пожалуйста, подтвердите:
+1. Финальное количество и целевая цена (USD/шт FOB)
+2. Требуемые сертификаты (GOST / CE / API)
+
+Формальный PI с упаковочным листом и вариантами доставки будет отправлен в течение 24 часов после подтверждения.
+
+С уважением,
+Aria · Помощник отдела продаж</pre>
+              </div>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span></div>
+        <p class="route-reason">匹配置信度 0.70，业务员快速过审后即可发出</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        <div class="follow-up">📨 72h 沉默触发跟进：<em>Напоминание: Прайс-лист и условия сотрудничества</em></div>
+        
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-008</span>
+        <span class="lang-tag">ES</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">MaquiPartes Iberia SL &lt;ventas@maquipartesiberia.es&gt;<br/>2026/4/28 06:30:00</div>
+        <div class="subject">RFQ: válvulas de bola DN25 SS304</div>
+        <pre class="body">Estimados,
+
+Pedido recurrente: 500 válvulas de bola DN25 (1&quot;), SS304, PN40, conexión BSP roscada.
+
+Necesitamos certificado CE y declaración RoHS. Destino Valencia, incoterm CIF.
+
+Precio última PO: 12.10 USD/pza. Esperamos mantener o mejorar.
+
+Gracias,
+Carmen Ruiz</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>MaquiPartes Iberia SL 寻购 valve，目的港 Valencia</span></li>
+            <li><b>类别</b><span>valve</span></li>
+            <li><b>数量</b><span>未明示</span></li>
+            <li><b>目的港</b><span>Valencia</span></li>
+            <li><b>紧急度</b><span class="urgency-high">high</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>CE, RoHS</span></li>
+            <li><b>关键词</b><span>500 / DN25</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>VL-BV-DN25</code></td>
+                  <td><span class="conf conf-high">0.90</span></td>
+                  <td>exact</td>
+                  <td>SKU 含 DN25；pressure=PN40 命中；客户历史采购</td>
+                </tr><tr>
+                  <td><code>VL-CHV-DN25</code></td>
+                  <td><span class="conf conf-mid">0.70</span></td>
+                  <td>alternate</td>
+                  <td>SKU 含 DN25</td>
+                </tr><tr>
+                  <td><code>VL-BV-DN15</code></td>
+                  <td><span class="conf conf-low">0.42</span></td>
+                  <td>upgrade</td>
+                  <td>pressure=PN40 命中</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: RFQ: válvulas de bola DN25 SS304</div>
+                <pre>Gracias por su consulta sobre MaquiPartes Iberia SL 寻购 valve，目的港 Valencia. Hemos revisado la especificación y seleccionado SKUs candidatos de nuestro catálogo.
+
+SKUs recomendados:
+1. VL-BV-DN25 — Stainless Steel Ball Valve DN25 | 12.5 USD | MOQ 50 | 12 days | SKU 含 DN25；pressure=PN40 命中；客户历史采购
+2. VL-CHV-DN25 — Brass Check Valve DN25 | 11.2 USD | MOQ 50 | 10 days | SKU 含 DN25
+3. VL-BV-DN15 — Stainless Steel Ball Valve DN15 | 6.8 USD | MOQ 100 | 10 days | pressure=PN40 命中
+
+Para emitir la PI formal, por favor confirme:
+1. Cantidad final del pedido y precio objetivo (USD/pza FOB)
+2. Please confirm the required certifications: CE, RoHS.
+
+Enviaremos una PI formal con lista de empaque y opciones de envío dentro de 24h tras la confirmación.
+
+Saludos cordiales,
+Aria · Asistente de Ventas</pre>
+              </div>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span></div>
+        <p class="route-reason">涉及认证 (CE/RoHS)，非 A 级客户首单，先送审</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        
+        <div class="reply-back">📬 客户回复：Gracias, confirmamos cantidad y certificaciones. Por favor envíen PI....</div>
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-009</span>
+        <span class="lang-tag">EN</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">Gulf Oilfield Services Ltd &lt;sourcing@oilfieldservices.com&gt;<br/>2026/4/28 07:55:00</div>
+        <div class="subject">Quote needed: gate valves DN80 PN10 ductile iron</div>
+        <pre class="body">We need 80 pieces of cast iron gate valves DN80 PN10, flanged ends, ductile iron GGG40 body. Application: fire-water network at offshore platform support.
+
+API 6D certification preferred. Please quote FOB Tianjin and lead time. Payment LC at sight.
+
+Thanks,
+Ahmed Al-Mansoori
+Sourcing Lead</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>Gulf Oilfield Services Ltd 寻购 valve，约 80 件，目的港 Tianjin</span></li>
+            <li><b>类别</b><span>valve</span></li>
+            <li><b>数量</b><span>80</span></li>
+            <li><b>目的港</b><span>Tianjin</span></li>
+            <li><b>紧急度</b><span class="urgency-normal">normal</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>API 6D</span></li>
+            <li><b>关键词</b><span>DN80</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>VL-GV-DN80</code></td>
+                  <td><span class="conf conf-mid">0.82</span></td>
+                  <td>alternate</td>
+                  <td>SKU 含 DN80；pressure=PN10 命中</td>
+                </tr><tr>
+                  <td><code>VL-BV-DN50</code></td>
+                  <td><span class="conf conf-low">0.30</span></td>
+                  <td>upgrade</td>
+                  <td>类别一致</td>
+                </tr><tr>
+                  <td><code>VL-BV-DN25</code></td>
+                  <td><span class="conf conf-low">0.30</span></td>
+                  <td>upgrade</td>
+                  <td>类别一致</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: Quote needed: gate valves DN80 PN10 ductile iron</div>
+                <pre>Thank you for the inquiry on Gulf Oilfield Services Ltd 寻购 valve，约 80 件，目的港 Tianjin. I have reviewed the spec and pulled candidate SKUs from our catalog.
+
+Recommended SKUs:
+1. VL-GV-DN80 — Cast Iron Gate Valve DN80 | 65 USD | MOQ 10 | 20 days | SKU 含 DN80；pressure=PN10 命中
+2. VL-BV-DN50 — Stainless Steel Ball Valve DN50 | 28 USD | MOQ 20 | 15 days | 类别一致
+3. VL-BV-DN25 — Stainless Steel Ball Valve DN25 | 12.5 USD | MOQ 50 | 12 days | 类别一致
+
+To finalize the formal PI, please confirm:
+1. Confirm the order quantity is 80 pcs and your target FOB unit price.
+2. Please confirm the required certifications: API 6D.
+
+Will send a formal PI with packing list and shipping options within 24h after the above is confirmed.
+
+Best regards,
+Aria · Sales Assistant</pre>
+              </div>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span></div>
+        <p class="route-reason">涉及认证 (API 6D)，非 A 级客户首单，先送审</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        <div class="follow-up">📨 72h 沉默触发跟进：<em>Following up: Quote needed: gate valves DN80 PN10 ductile iron</em></div>
+        
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-010</span>
+        <span class="lang-tag">EN</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#9a3328;color:#ffd9d4;">👤 转人工</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">Aussie Industrial Machines Pty &lt;purchasing@aussiemachines.com.au&gt;<br/>2026/4/28 08:20:00</div>
+        <div class="subject">RFQ: solenoid valve 4WE6 DC24V Rexroth-compatible</div>
+        <pre class="body">G'day,
+
+Looking for 50 pieces of solenoid directional valves NG6 size, 4-way 3-position spool E type, DC24V coil, max pressure 31.5MPa. Must be Rexroth 4WE6E compatible.
+
+Melbourne port. Need delivery within 6 weeks. Please send datasheet and pricing.
+
+Cheers,
+Dave Williams</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>Aussie Industrial Machines Pty 寻购 mixed，约 50 件，目的港 Melbourne</span></li>
+            <li><b>类别</b><span>mixed</span></li>
+            <li><b>数量</b><span>50</span></li>
+            <li><b>目的港</b><span>Melbourne</span></li>
+            <li><b>紧急度</b><span class="urgency-normal">normal</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>—</span></li>
+            <li><b>关键词</b><span>—</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>HY-VLV-4WE6</code></td>
+                  <td><span class="conf conf-low">0.42</span></td>
+                  <td>upgrade</td>
+                  <td>pressure=31.5MPa 命中</td>
+                </tr><tr>
+                  <td><code>BR-22210-EK</code></td>
+                  <td><span class="conf conf-low">0.30</span></td>
+                  <td>upgrade</td>
+                  <td>类别一致</td>
+                </tr><tr>
+                  <td><code>BR-7208-AC</code></td>
+                  <td><span class="conf conf-low">0.30</span></td>
+                  <td>upgrade</td>
+                  <td>类别一致</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: RFQ: solenoid valve 4WE6 DC24V Rexroth-compatible</div>
+                <pre>Thank you for the inquiry on Aussie Industrial Machines Pty 寻购 mixed，约 50 件，目的港 Melbourne. I have reviewed the spec and pulled candidate SKUs from our catalog.
+
+Recommended SKUs:
+1. HY-VLV-4WE6 — Solenoid Directional Valve 4WE6E DC24V | 95 USD | MOQ 10 | 20 days | pressure=31.5MPa 命中
+2. BR-22210-EK — Spherical Roller Bearing 22210EK | 18.5 USD | MOQ 20 | 14 days | 类别一致
+3. BR-7208-AC — Angular Contact Ball Bearing 7208AC | 6.8 USD | MOQ 50 | 10 days | 类别一致
+
+To finalize the formal PI, please confirm:
+1. Confirm the order quantity is 50 pcs and your target FOB unit price.
+2. Required certifications (CE / GOST / API / ISO)
+
+Will send a formal PI with packing list and shipping options within 24h after the above is confirmed.
+
+Best regards,
+Aria · Sales Assistant</pre>
+              </div>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#9a3328;color:#ffd9d4;">👤 转人工</span></div>
+        <p class="route-reason">候选 SKU 置信度均 &lt; 0.6，需人工补充选品</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        <div class="follow-up">📨 72h 沉默触发跟进：<em>Following up: RFQ: solenoid valve 4WE6 DC24V Rexroth-compatible</em></div>
+        
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-011</span>
+        <span class="lang-tag">EN</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#3a3a3a;color:#bbb;">✕ 非业务</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">Startup Machines Inc &lt;cto@startup-machines.io&gt;<br/>2026/4/28 08:45:00</div>
+        <div class="subject">Looking for someone to invest in our AI startup</div>
+        <pre class="body">Dear Sir/Madam,
+
+We are an exciting AI startup revolutionizing industrial automation. We're seeking strategic investors and partners who share our vision. Would you be interested in a 30-minute intro call to discuss potential collaboration?
+
+We have great traction and bla bla bla.
+
+Best,
+John</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>Non-business outreach</span></li>
+            <li><b>类别</b><span>unknown</span></li>
+            <li><b>数量</b><span>未明示</span></li>
+            <li><b>目的港</b><span>未明示</span></li>
+            <li><b>紧急度</b><span class="urgency-low">low</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>—</span></li>
+            <li><b>关键词</b><span>—</span></li>
+          </ul>
+          <div class="reject">⛔ 投资邀约/合作请求，非外贸采购询盘</div>
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <em>无候选（已转人工补品）</em>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <em>未生成</em>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#3a3a3a;color:#bbb;">✕ 非业务</span></div>
+        <p class="route-reason">投资邀约/合作请求，非外贸采购询盘</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        
+        
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-012</span>
+        <span class="lang-tag">EN</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#9a3328;color:#ffd9d4;">👤 转人工</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">Pakistan Engineering Works &lt;ops@pew.com.pk&gt;<br/>2026/4/28 03:11:00</div>
+        <div class="subject">Follow-up on bearing 7208AC inquiry from last week</div>
+        <pre class="body">Hello,
+
+Following up on our query about angular contact bearings 7208AC, contact angle 25°. We did not receive a response yet. Order needed: 200pcs. Karachi.
+
+Is there anyone covering my account?
+
+Muhammad Asif</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>Pakistan Engineering Works 寻购 bearing，约 200 件，目的港 Karachi</span></li>
+            <li><b>类别</b><span>bearing</span></li>
+            <li><b>数量</b><span>200</span></li>
+            <li><b>目的港</b><span>Karachi</span></li>
+            <li><b>紧急度</b><span class="urgency-high">high</span></li>
+            <li><b>情绪</b><span>frustrated</span></li>
+            <li><b>认证</b><span>—</span></li>
+            <li><b>关键词</b><span>—</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>BR-22210-EK</code></td>
+                  <td><span class="conf conf-low">0.38</span></td>
+                  <td>upgrade</td>
+                  <td>客户历史采购</td>
+                </tr><tr>
+                  <td><code>BR-7208-AC</code></td>
+                  <td><span class="conf conf-low">0.38</span></td>
+                  <td>upgrade</td>
+                  <td>客户历史采购</td>
+                </tr><tr>
+                  <td><code>BR-6205-2RS</code></td>
+                  <td><span class="conf conf-low">0.30</span></td>
+                  <td>upgrade</td>
+                  <td>类别一致</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: Follow-up on bearing 7208AC inquiry from last week</div>
+                <pre>Thank you for the inquiry on Pakistan Engineering Works 寻购 bearing，约 200 件，目的港 Karachi. I have reviewed the spec and pulled candidate SKUs from our catalog.
+
+Recommended SKUs:
+1. BR-22210-EK — Spherical Roller Bearing 22210EK | 18.5 USD | MOQ 20 | 14 days | 客户历史采购
+2. BR-7208-AC — Angular Contact Ball Bearing 7208AC | 6.8 USD | MOQ 50 | 10 days | 客户历史采购
+3. BR-6205-2RS — Deep Groove Ball Bearing 6205-2RS | 1.85 USD | MOQ 100 | 7 days | 类别一致
+
+To finalize the formal PI, please confirm:
+1. Confirm the order quantity is 200 pcs and your target FOB unit price.
+2. Required certifications (CE / GOST / API / ISO)
+
+Will send a formal PI with packing list and shipping options within 24h after the above is confirmed.
+
+Best regards,
+Aria · Sales Assistant</pre>
+              </div>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#9a3328;color:#ffd9d4;">👤 转人工</span></div>
+        <p class="route-reason">客户已表现不耐烦/催单，必须真人接管以稳住关系</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        <div class="follow-up">📨 72h 沉默触发跟进：<em>Following up: Follow-up on bearing 7208AC inquiry from last week</em></div>
+        
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-013</span>
+        <span class="lang-tag">RU</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#9a3328;color:#ffd9d4;">👤 转人工</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">OOO Promtekhsnab &lt;snab@promtekhsnab.ru&gt;<br/>2026/4/28 05:28:00</div>
+        <div class="subject">Доп. позиция к заказу: гидрошланг 2SN 1/2</div>
+        <pre class="body">Добавьте к нашему текущему запросу также:
+- Шланг гидравлический 2SN, 1/2 дюйма, 500 метров
+- Рабочее давление 27.5 МПа
+
+Доставка вместе с шаровыми кранами.
+
+Иван</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>OOO Promtekhsnab 寻购 mixed</span></li>
+            <li><b>类别</b><span>mixed</span></li>
+            <li><b>数量</b><span>未明示</span></li>
+            <li><b>目的港</b><span>未明示</span></li>
+            <li><b>紧急度</b><span class="urgency-normal">normal</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>—</span></li>
+            <li><b>关键词</b><span>500</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>VL-BV-DN50</code></td>
+                  <td><span class="conf conf-low">0.38</span></td>
+                  <td>upgrade</td>
+                  <td>客户历史采购</td>
+                </tr><tr>
+                  <td><code>VL-GV-DN80</code></td>
+                  <td><span class="conf conf-low">0.38</span></td>
+                  <td>upgrade</td>
+                  <td>客户历史采购</td>
+                </tr><tr>
+                  <td><code>BR-6205-2RS</code></td>
+                  <td><span class="conf conf-low">0.30</span></td>
+                  <td>upgrade</td>
+                  <td>类别一致</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: Доп. позиция к заказу: гидрошланг 2SN 1/2</div>
+                <pre>Благодарим за запрос по OOO Promtekhsnab 寻购 mixed. Мы изучили спецификацию и подобрали SKU из нашего каталога.
+Как долгосрочный партнёр, ваш запрос отмечен как приоритетный.
+
+Рекомендуемые SKU:
+1. VL-BV-DN50 — Stainless Steel Ball Valve DN50 | 28 USD | MOQ 20 | 15 days | 客户历史采购
+2. VL-GV-DN80 — Cast Iron Gate Valve DN80 | 65 USD | MOQ 10 | 20 days | 客户历史采购
+3. BR-6205-2RS — Deep Groove Ball Bearing 6205-2RS | 1.85 USD | MOQ 100 | 7 days | 类别一致
+
+Для оформления формального PI, пожалуйста, подтвердите:
+1. Финальное количество и целевая цена (USD/шт FOB)
+2. Требуемые сертификаты (GOST / CE / API)
+
+Формальный PI с упаковочным листом и вариантами доставки будет отправлен в течение 24 часов после подтверждения.
+
+С уважением,
+Aria · Помощник отдела продаж</pre>
+              </div>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#9a3328;color:#ffd9d4;">👤 转人工</span></div>
+        <p class="route-reason">候选 SKU 置信度均 &lt; 0.6，需人工补充选品</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        <div class="follow-up">📨 72h 沉默触发跟进：<em>Напоминание: Доп. позиция к заказу: гидрошланг 2SN 1/2</em></div>
+        
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-014</span>
+        <span class="lang-tag">EN</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">Sinopec Supply Chain &lt;buyer@sinopec-supply.com&gt;<br/>2026/4/28 06:10:00</div>
+        <div class="subject">Bulk inquiry: hex bolts M8/M12/M16 hot-dip galvanized</div>
+        <pre class="body">Hi,
+
+Large project demand:
+- M8x40 grade 8.8 HDG: 200,000 pcs
+- M12x60 grade 10.9 HDG: 80,000 pcs
+- M16x80 grade 8.8 HDG: 40,000 pcs
+
+DIN931/933. Project: petrochemical plant in Saudi Arabia. Required CE + EN15048 certified production.
+
+Please quote your best price and delivery. Project shortlist closing in 10 days.
+
+Thanks,
+Li Wei (procurement agent)</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>Sinopec Supply Chain 寻购 fastener，目的港 Saudi Arabia</span></li>
+            <li><b>类别</b><span>fastener</span></li>
+            <li><b>数量</b><span>0</span></li>
+            <li><b>目的港</b><span>Saudi Arabia</span></li>
+            <li><b>紧急度</b><span class="urgency-high">high</span></li>
+            <li><b>情绪</b><span>neutral</span></li>
+            <li><b>认证</b><span>CE</span></li>
+            <li><b>关键词</b><span>200 / 000 / 933 / M8x40 / M12x60</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>FS-BOLT-M8</code></td>
+                  <td><span class="conf conf-mid">0.78</span></td>
+                  <td>alternate</td>
+                  <td>规格匹配 933；规格匹配 M8x40；grade=8.8 命中</td>
+                </tr><tr>
+                  <td><code>FS-BOLT-M16</code></td>
+                  <td><span class="conf conf-mid">0.60</span></td>
+                  <td>upgrade</td>
+                  <td>规格匹配 M16x80；grade=8.8 命中</td>
+                </tr><tr>
+                  <td><code>FS-BOLT-M12</code></td>
+                  <td><span class="conf conf-low">0.48</span></td>
+                  <td>upgrade</td>
+                  <td>规格匹配 M12x60</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: Bulk inquiry: hex bolts M8/M12/M16 hot-dip galvanized</div>
+                <pre>Thank you for the inquiry on Sinopec Supply Chain 寻购 fastener，目的港 Saudi Arabia. I have reviewed the spec and pulled candidate SKUs from our catalog.
+
+Recommended SKUs:
+1. FS-BOLT-M8 — Hex Bolt M8x40 Grade 8.8 Zinc Plated | 0.05 USD | MOQ 5000 | 7 days | 规格匹配 933；规格匹配 M8x40；grade=8.8 命中
+2. FS-BOLT-M16 — Hex Bolt M16x80 Grade 8.8 HDG | 0.55 USD | MOQ 1000 | 10 days | 规格匹配 M16x80；grade=8.8 命中
+3. FS-BOLT-M12 — Hex Bolt M12x60 Grade 10.9 Black | 0.18 USD | MOQ 2000 | 7 days | 规格匹配 M12x60
+
+To finalize the formal PI, please confirm:
+1. Final order quantity &amp; target unit price (USD/pc, FOB)
+2. Please confirm the required certifications: CE.
+
+Will send a formal PI with packing list and shipping options within 24h after the above is confirmed.
+
+Best regards,
+Aria · Sales Assistant</pre>
+              </div>
+        <details class="revision">
+                <summary>📝 业务员修订（diff 10%）</summary>
+                <div class="rev-summary">大批量订单加挂厂直价格钩子</div>
+                <pre>Thank you for the inquiry on Sinopec Supply Chain 寻购 fastener，目的港 Saudi Arabia. I have reviewed the spec and pulled candidate SKUs from our catalog.
+
+Recommended SKUs:
+1. FS-BOLT-M8 — Hex Bolt M8x40 Grade 8.8 Zinc Plated | 0.05 USD | MOQ 5000 | 7 days | 规格匹配 933；规格匹配 M8x40；grade=8.8 命中
+2. FS-BOLT-M16 — Hex Bolt M16x80 Grade 8.8 HDG | 0.55 USD | MOQ 1000 | 10 days | 规格匹配 M16x80；grade=8.8 命中
+3. FS-BOLT-M12 — Hex Bolt M12x60 Grade 10.9 Black | 0.18 USD | MOQ 2000 | 7 days | 规格匹配 M12x60
+
+To finalize the formal PI, please confirm:
+1. Final order quantity &amp; target unit price (USD/pc, FOB)
+2. Please confirm the required certifications: CE.
+
+Will send a formal PI with packing list and shipping options within 24h after the above is confirmed.
+
+Best regards,
+Aria · Sales Assistant
+
+For 200K+ M8 bolts we can offer mill direct pricing — please share target price.</pre>
+              </details>
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#a26a06;color:#fff2cc;">⏳ 送审</span></div>
+        <p class="route-reason">涉及认证 (CE)，非 A 级客户首单，先送审</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        <div class="follow-up">📨 72h 沉默触发跟进：<em>Following up: Bulk inquiry: hex bolts M8/M12/M16 hot-dip galvanized</em></div>
+        
+      </section>
+    </div>
+  </article>
+  <article class="card">
+    <header class="card-head">
+      <div>
+        <span class="inquiry-id">INQ-015</span>
+        <span class="lang-tag">ES</span>
+        <span class="blind-tag">🌙 时差盲区</span>
+      </div>
+      <span class="badge" style="background:#9a3328;color:#ffd9d4;">👤 转人工</span>
+    </header>
+    <div class="grid">
+      <section>
+        <h4>① 询盘原文</h4>
+        <div class="meta">Industrias Ferreterías Hernández &lt;compras@ferreteriashernandez.mx&gt;<br/>2026/4/28 07:40:00</div>
+        <div class="subject">¿Recibieron mi cotización? — seguimiento</div>
+        <pre class="body">Hola,
+
+Les envié una solicitud hace 3 días sobre tornillos M8/M12 y tuercas M10. No he recibido respuesta. ¿Está mi pedido en proceso?
+
+Necesito decisión esta semana, otros proveedores ya respondieron.
+
+María</pre>
+      </section>
+      <section>
+        <h4>② 解析结果</h4>
+        
+          <ul class="kv">
+            <li><b>意图</b><span>Industrias Ferreterías Hernández 寻购 fastener</span></li>
+            <li><b>类别</b><span>fastener</span></li>
+            <li><b>数量</b><span>未明示</span></li>
+            <li><b>目的港</b><span>未明示</span></li>
+            <li><b>紧急度</b><span class="urgency-high">high</span></li>
+            <li><b>情绪</b><span>frustrated</span></li>
+            <li><b>认证</b><span>—</span></li>
+            <li><b>关键词</b><span>M8 / M12 / M10</span></li>
+          </ul>
+          
+        
+      </section>
+      <section>
+        <h4>③ 候选 SKU</h4>
+        <table class="matches">
+              <thead><tr><th>SKU</th><th>置信</th><th>类型</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>FS-BOLT-M8</code></td>
+                  <td><span class="conf conf-mid">0.78</span></td>
+                  <td>alternate</td>
+                  <td>SKU 含 M8；客户历史采购</td>
+                </tr><tr>
+                  <td><code>FS-BOLT-M12</code></td>
+                  <td><span class="conf conf-mid">0.78</span></td>
+                  <td>alternate</td>
+                  <td>SKU 含 M12；客户历史采购</td>
+                </tr><tr>
+                  <td><code>FS-NUT-M10</code></td>
+                  <td><span class="conf conf-mid">0.78</span></td>
+                  <td>alternate</td>
+                  <td>SKU 含 M10；客户历史采购</td>
+                </tr>
+              </tbody>
+            </table>
+      </section>
+      <section>
+        <h4>④ 草稿</h4>
+        <div class="draft">
+                <div class="draft-subject">Re: ¿Recibieron mi cotización? — seguimiento</div>
+                <pre>Gracias por su consulta sobre Industrias Ferreterías Hernández 寻购 fastener. Hemos revisado la especificación y seleccionado SKUs candidatos de nuestro catálogo.
+
+SKUs recomendados:
+1. FS-BOLT-M8 — Hex Bolt M8x40 Grade 8.8 Zinc Plated | 0.05 USD | MOQ 5000 | 7 days | SKU 含 M8；客户历史采购
+2. FS-BOLT-M12 — Hex Bolt M12x60 Grade 10.9 Black | 0.18 USD | MOQ 2000 | 7 days | SKU 含 M12；客户历史采购
+3. FS-NUT-M10 — Hex Nut M10 Grade 8 Zinc Plated | 0.04 USD | MOQ 10000 | 5 days | SKU 含 M10；客户历史采购
+
+Para emitir la PI formal, por favor confirme:
+1. Cantidad final del pedido y precio objetivo (USD/pza FOB)
+2. Certificaciones requeridas (CE / GOST / RoHS)
+
+Enviaremos una PI formal con lista de empaque y opciones de envío dentro de 24h tras la confirmación.
+
+Saludos cordiales,
+Aria · Asistente de Ventas</pre>
+              </div>
+        
+      </section>
+      <section class="route-section">
+        <h4>⑤ 路由决策</h4>
+        <div><span class="badge" style="background:#9a3328;color:#ffd9d4;">👤 转人工</span></div>
+        <p class="route-reason">客户已表现不耐烦/催单，必须真人接管以稳住关系</p>
+        <div class="meta-line">
+          ⚙ <span class="via-mock">mock</span> → <span class="via-mock">mock</span> → <span class="via-mock">mock</span>
+          · 0ms
+        </div>
+        <div class="follow-up">📨 72h 沉默触发跟进：<em>Seguimiento: ¿Recibieron mi cotización? — seguimiento</em></div>
+        
+      </section>
+    </div>
+  </article>
+
+    <h2 class="section-title">人工修订模式聚合（深度陪跑闭环）</h2>
+          <div class="pattern-list">
+            <p style="color:var(--muted);font-size:12px;margin-top:0;">连续 4 周稳定出现的修订模式 → 自动生成 prompt 优化建议</p>
+            <ul>
+              <li><b>补充付款条款明确表态 + 增加样品赠送钩子</b> · 出现 1 次</li><li><b>Lead time 表述本地化 + 强调可议价</b> · 出现 1 次</li><li><b>大批量订单加挂厂直价格钩子</b> · 出现 1 次</li>
+            </ul>
+          </div>
+
+    <div class="footer">
+      生成于 2026/4/28 23:08:38
+      · LLM via: deterministic mock
+      · 数据回流路径：每条事件已按需写入 events.jsonl，可作为评估集与 prompt 训练素材。
+    </div>
+  </div>
+</body>
+</html>

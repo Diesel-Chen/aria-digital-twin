@@ -1,0 +1,8 @@
+node_modules
+.env
+.env.local
+*.log
+events.jsonl
+.DS_Store
+bun.lock
+bun.lockb
