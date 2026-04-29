@@ -1,7 +1,12 @@
 # Aria · 跨境 B2B 询盘响应数字分身
 
-> 面试题"企业级数字分身设计与搭建"的交付原型。
+> 企业级数字分身设计与搭建 — 可运行原型。
 > 服务跨境制造/贸易企业的**外贸业务员/海外销售经理**岗位，专攻"海外询盘集中在中国深夜到达、首响延迟 12-18h、高意向客户大量流失"这一具体痛点。
+
+🌐 **在线浏览**：
+- 着陆页 / 产品动态说明：https://diesel-chen.github.io/aria-digital-twin/
+- Demo 端到端运行报告：https://diesel-chen.github.io/aria-digital-twin/demo-report.html
+- 互动 Web Demo（需本地启动，见下方"启动交互式 Web Demo"）
 
 | 产品动态说明（pitch.html） | Demo 端到端运行报告（demo-report.html） |
 | --- | --- |
@@ -70,17 +75,28 @@ docker run -d -p 3000:3000 --name aria aria-digital-twin
 
 ## 走真实 LLM（可选）
 
+`.env` 已被 `.gitignore` 忽略，凭据只在本地存在，不会推到 GitHub。
+
 ```bash
 cp .env.example .env
+
 # 选项 A: 直接走 OpenAI
 echo "OPENAI_API_KEY=sk-..." >> .env
+echo "ARIA_MODEL=gpt-4o-mini" >> .env
 
-# 选项 B: 走 LiteLLM 网关（与 renewmake 主项目一致）
-echo "LITELLM_BASE_URL=https://your-litellm.example.com" >> .env
+# 选项 B: 走 LiteLLM 网关（推荐，多模型可选）
+echo "LITELLM_BASE_URL=https://your-litellm.example.com/v1" >> .env
 echo "LITELLM_API_KEY=sk-..." >> .env
+echo "ARIA_MODEL=gpt-5.4" >> .env   # 或网关支持的任意 chat 模型
 
+# 端到端跑 15 条询盘
 LIVE=1 bun scripts/demo.ts
+
+# 起 Web Demo，UI 上每次「处理这条询盘」都会真实调用 LLM
+LIVE=1 bun server.ts
 ```
+
+LIVE 模式下 `event.llmVia` 会是 `["live", "live", "live"]`，对应「解析 / 匹配 / 草稿」三步均走真实 LLM。
 
 ## 目录结构
 

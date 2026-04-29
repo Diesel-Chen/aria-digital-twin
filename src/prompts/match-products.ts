@@ -2,24 +2,26 @@ import { z } from "zod";
 import { ariaGenerateObject } from "../llm";
 import type { Customer, InquiryParsed, MatchedProduct, Product } from "../types";
 
-const MatchSchema = z.object({
-  matches: z.array(
-    z.object({
-      sku: z.string(),
-      confidence: z.number().min(0).max(1),
-      reason: z.string(),
-      tag: z.enum(["exact", "alternate", "upgrade"]),
-    }),
-  ),
+const MatchItem = z.object({
+  sku: z.string(),
+  confidence: z.number().min(0).max(1),
+  reason: z.string(),
+  tag: z.enum(["exact", "alternate", "upgrade"]),
 });
 
+const MatchSchema = z.preprocess(
+  (v) => (Array.isArray(v) ? { matches: v } : v),
+  z.object({ matches: z.array(MatchItem) }),
+);
+
 const SYSTEM = `你是 Aria 产品匹配专家。从给定 SKU 库中为询盘挑出最多 3 个候选 SKU。
-规则：
+输出要求：返回 JSON 对象 {"matches": [...]}，matches 是最多 3 个候选 SKU，不要直接返回数组。
+评分规则：
 1. 优先精确匹配（型号、尺寸、压力、材质完全对得上）→ tag = exact，confidence ≥ 0.85。
 2. 次选近似平替（参数接近，可作为替代方案）→ tag = alternate，0.65 ≤ confidence < 0.85。
 3. 偶尔可推荐升级款（更高规格但同场景）→ tag = upgrade，0.60 ≤ confidence < 0.80。
 4. 客户历史买过的同类 SKU 加分 0.05–0.10。
-5. 给出简短中文 reason（≤30 字），点出关键匹配点。
+5. 每条 reason 是简短中文（≤30 字），点出关键匹配点。
 6. 全部候选都低于 0.6 时仍保留前 3 名，让人工复审。`;
 
 export async function matchProducts(

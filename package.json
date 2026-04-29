@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Aria — 跨境 B2B 高意向询盘响应数字分身（面试题原型）",
+  "description": "Aria — 跨境 B2B 高意向询盘响应数字分身",
   "scripts": {
     "demo": "bun scripts/demo.ts",
     "demo:live": "LIVE=1 bun scripts/demo.ts",

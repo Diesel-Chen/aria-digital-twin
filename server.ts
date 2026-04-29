@@ -80,16 +80,19 @@ const server = Bun.serve({
 
     if (req.method === "POST" && path === "/api/process") {
       const body = (await req.json()) as Partial<Inquiry>;
+      const sample = body.id ? inquiries.find((q) => q.id === body.id) : null;
+      const base: Partial<Inquiry> = sample ?? {};
       const inquiry: Inquiry = {
         id: body.id || `INQ-CUSTOM-${Date.now()}`,
-        fromEmail: body.fromEmail || "buyer@example.com",
-        fromCompany: body.fromCompany || "Custom Buyer",
-        customerId: body.customerId ?? null,
-        subject: body.subject || "(no subject)",
-        body: body.body || "",
-        language: (body.language as Inquiry["language"]) || "en",
-        receivedAt: body.receivedAt || new Date().toISOString(),
-        urgencyHint: (body.urgencyHint as Inquiry["urgencyHint"]) || "normal",
+        fromEmail: body.fromEmail || base.fromEmail || "buyer@example.com",
+        fromCompany: body.fromCompany || base.fromCompany || "Custom Buyer",
+        customerId: body.customerId ?? base.customerId ?? null,
+        subject: body.subject || base.subject || "(no subject)",
+        body: body.body || base.body || "",
+        language: (body.language as Inquiry["language"]) || base.language || "en",
+        receivedAt: body.receivedAt || base.receivedAt || new Date().toISOString(),
+        urgencyHint:
+          (body.urgencyHint as Inquiry["urgencyHint"]) || base.urgencyHint || "normal",
       };
       const event = await processInquiry(inquiry, products, customers);
       const matchedProductDetails = event.matches.map((m) => {
