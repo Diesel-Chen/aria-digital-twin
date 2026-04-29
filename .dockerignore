@@ -1,0 +1,9 @@
+node_modules
+.git
+.env
+.env.*
+events.jsonl
+docs/screenshots
+docs/demo-report.html
+.DS_Store
+*.log

@@ -1,0 +1,16 @@
+services:
+  aria:
+    build: .
+    image: aria-digital-twin:latest
+    container_name: aria-digital-twin
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      # 默认 mock 模式；如需走真实 LLM，把以下三个变量改为真实值并设 LIVE=1
+      LIVE: "0"
+      # OPENAI_API_KEY: ""
+      # LITELLM_BASE_URL: ""
+      # LITELLM_API_KEY: ""

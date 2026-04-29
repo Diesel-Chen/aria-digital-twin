@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aria · 跨境 B2B 询盘响应数字分身 — Live Demo</title>
+<style>
+  :root {
+    --bg: #0e1220;
+    --surface: #161a2c;
+    --surface-2: #1d2238;
+    --line: #232844;
+    --text: #e6e9f5;
+    --muted: #9aa0bd;
+    --accent: #6c8aff;
+    --accent2: #8b6cff;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --bad: #f87171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 14px;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .topbar {
+    background: linear-gradient(135deg, #5468ff 0%, #8b6cff 60%, #6c8aff 100%);
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .brand { font-size: 16px; font-weight: 700; }
+  .brand small { opacity: 0.8; font-weight: 400; margin-left: 8px; font-size: 12px; }
+  .topbar nav { font-size: 13px; }
+  .topbar nav a { color: rgba(255,255,255,0.92); margin-left: 18px; }
+  .layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 60px);
+  }
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--line);
+    padding: 24px 22px;
+    overflow-y: auto;
+    max-height: calc(100vh - 60px);
+    position: sticky;
+    top: 0;
+  }
+  .sidebar h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  .mode-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    padding: 4px;
+    background: var(--bg);
+    border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+  .mode-tabs button {
+    flex: 1;
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .mode-tabs button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .sample-list { display: flex; flex-direction: column; gap: 8px; }
+  .sample-item {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .sample-item:hover { border-color: var(--accent); }
+  .sample-item.active { border-color: var(--accent); background: rgba(108,138,255,0.1); }
+  .sample-id { font-size: 11px; color: var(--accent); font-weight: 600; }
+  .sample-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .sample-subject {
+    font-size: 12px;
+    color: var(--text);
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .lang-tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(108,138,255,0.18);
+    color: var(--accent);
+    font-size: 10px;
+    margin-right: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .urg-tag.high { background: rgba(248,113,113,0.18); color: var(--bad); }
+  .urg-tag.normal { background: rgba(154,160,189,0.15); color: var(--muted); }
+  .urg-tag.low { background: rgba(154,160,189,0.1); color: var(--muted); }
+  .urg-tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .main {
+    padding: 28px 36px;
+    overflow-y: auto;
+    max-height: calc(100vh - 60px);
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+  .panel h3 {
+    margin: 0 0 14px;
+    font-size: 14px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel h3::before {
+    content: "";
+    width: 3px; height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .input-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .input-row > * { flex: 1; min-width: 140px; }
+  textarea, input, select {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    width: 100%;
+  }
+  textarea { resize: vertical; min-height: 140px; line-height: 1.55; }
+  textarea:focus, input:focus, select:focus { outline: none; border-color: var(--accent); }
+  .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  button.btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  button.btn:hover { opacity: 0.9; }
+  button.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.btn.secondary {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--line);
+  }
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .empty-emoji { font-size: 32px; opacity: 0.6; margin-bottom: 8px; }
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .result-grid > .full { grid-column: 1 / -1; }
+  .field { margin-bottom: 10px; }
+  .field-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .field-value { font-size: 13px; color: var(--text); }
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--text);
+    margin-right: 4px;
+    margin-bottom: 3px;
+  }
+  .match-item {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .match-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .match-sku { font-weight: 700; font-size: 13px; }
+  .match-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .match-tag.exact { background: rgba(52,211,153,0.18); color: var(--good); }
+  .match-tag.alternate { background: rgba(108,138,255,0.18); color: var(--accent); }
+  .match-tag.upgrade { background: rgba(251,191,36,0.18); color: var(--warn); }
+  .conf-bar {
+    height: 4px; background: var(--line); border-radius: 2px;
+    margin: 6px 0; overflow: hidden;
+  }
+  .conf-bar > span {
+    display: block; height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .match-rsn { font-size: 12px; color: var(--muted); }
+  .draft-box {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 360px;
+    overflow-y: auto;
+  }
+  .route-card {
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+  .route-card.auto_send { background: rgba(52,211,153,0.08); border-color: rgba(52,211,153,0.3); }
+  .route-card.review { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.3); }
+  .route-card.human { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.3); }
+  .route-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .route-name.auto_send { color: var(--good); }
+  .route-name.review { color: var(--warn); }
+  .route-name.human { color: var(--bad); }
+  .route-rsn { font-size: 13px; color: var(--text); }
+  .roi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  .roi-card {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .roi-num {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 4px;
+  }
+  .roi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .roi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .batch-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 14px;
+  }
+  .batch-table th, .batch-table td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .batch-table th { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .badge.auto_send { color: var(--good); }
+  .badge.review { color: var(--warn); }
+  .badge.human { color: var(--bad); }
+  .loading {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .mode-banner {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  .mode-banner b { color: var(--text); }
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--line); }
+    .result-grid { grid-template-columns: 1fr; }
+    .roi-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      Aria · 跨境 B2B 询盘响应数字分身
+      <small>面试题原型 / Live Demo</small>
+    </div>
+    <nav>
+      <a href="/" target="_blank">主页</a>
+      <a href="https://github.com/Diesel-Chen/aria-digital-twin" target="_blank">GitHub</a>
+    </nav>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="mode-tabs">
+        <button id="tab-sample" class="active">15 条样例</button>
+        <button id="tab-custom">自定义询盘</button>
+      </div>
+
+      <div id="sample-section">
+        <h2>样例询盘（多语言）</h2>
+        <div id="sample-list" class="sample-list">
+          <div class="empty"><div class="empty-emoji">⏳</div>加载中…</div>
+        </div>
+      </div>
+
+      <div id="custom-section" style="display:none;">
+        <h2>自定义询盘</h2>
+        <div class="field">
+          <div class="field-label">来源公司</div>
+          <input id="c-company" type="text" value="Acme Trading Co." />
+        </div>
+        <div class="field">
+          <div class="field-label">来源邮箱</div>
+          <input id="c-email" type="email" value="buyer@acme.com" />
+        </div>
+        <div class="input-row">
+          <div>
+            <div class="field-label">语种</div>
+            <select id="c-language">
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="ru">Русский</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">紧急度</div>
+            <select id="c-urgency">
+              <option value="normal">normal</option>
+              <option value="high">high</option>
+              <option value="low">low</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">主题</div>
+          <input id="c-subject" type="text" value="RFQ: SKF deep groove ball bearings" />
+        </div>
+        <div class="field">
+          <div class="field-label">正文</div>
+          <textarea id="c-body" rows="6">Hi team,
+
+We are looking for SKF 6205-2RS deep groove ball bearings, 5000 pcs, ISO certified. Please send price, MOQ, lead time and PI.
+
+Best,
+John</textarea>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div id="mode-banner" class="mode-banner">运行模式 <b id="run-mode">…</b> · 数据 <b id="data-stat">…</b></div>
+
+      <div class="panel">
+        <h3>询盘原文</h3>
+        <div id="inquiry-display"><div class="empty">从左侧选一条样例，或切到自定义询盘</div></div>
+        <div class="btn-row">
+          <button id="btn-process" class="btn">▶ 处理这条询盘</button>
+          <button id="btn-batch" class="btn secondary">🚀 批跑 15 条 + ROI</button>
+        </div>
+      </div>
+
+      <div id="single-result" style="display:none;">
+        <div class="panel">
+          <h3>① 询盘解析</h3>
+          <div id="parsed-block"></div>
+        </div>
+        <div class="panel">
+          <h3>② SKU 匹配（Top 3）</h3>
+          <div id="matches-block"></div>
+        </div>
+        <div class="panel">
+          <h3>③ 多语言回复草稿</h3>
+          <div id="draft-block"></div>
+        </div>
+        <div class="panel">
+          <h3>④ 路由决策</h3>
+          <div id="route-block"></div>
+        </div>
+      </div>
+
+      <div id="batch-result" style="display:none;">
+        <div class="panel">
+          <h3>批跑 ROI 看板</h3>
+          <div id="roi-block"></div>
+        </div>
+        <div class="panel">
+          <h3>批跑明细</h3>
+          <div id="batch-table-wrap"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -40,6 +40,34 @@ open docs/demo-report.html    # 15 条询盘 5 段式处理详情 + ROI 看板
 open docs/pitch.html          # 产品动态说明（单页 HTML，可截长图）
 ```
 
+## 启动交互式 Web Demo
+
+```bash
+# 默认 3000 端口，mock 模式
+bun server.ts
+# 浏览器打开 http://localhost:3000
+```
+
+页面提供：左侧 15 条样例询盘 + 自定义输入；右侧实时展示「解析 / SKU 匹配 / 多语言草稿 / 路由决策」四步结果；一键「批跑 15 条 + ROI」看板。
+
+| Web Demo 首页 | 处理结果 |
+| --- | --- |
+| ![home](docs/screenshots/web-demo-home.png) | ![result](docs/screenshots/web-demo-result.png) |
+
+## Docker 部署
+
+```bash
+# 一键起服务（mock 模式，不需要 API key）
+docker compose up -d
+# 浏览器打开 http://localhost:3000
+
+# 单独构建 / 运行
+docker build -t aria-digital-twin .
+docker run -d -p 3000:3000 --name aria aria-digital-twin
+```
+
+镜像基于 `oven/bun:1.3-alpine`，约 200MB；启动后即可访问页面与 `/api/*` 接口。要走真实 LLM，把 `docker-compose.yml` 里的 `LIVE=1` 与 `OPENAI_API_KEY` / `LITELLM_*` 取消注释填入即可。
+
 ## 走真实 LLM（可选）
 
 ```bash
